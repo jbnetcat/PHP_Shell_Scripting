@@ -56,7 +56,7 @@ create a directory on a remote machine.
 	    
     //Now show us the contents of $x, insert a newline before and after it please: \n
     echo ("\n$x\n");
-?>
+    ?>
 
 
 
