@@ -8,22 +8,24 @@ But you can also run a PHP Shell script as a standalone executable. This guide s
 
 The following script is pretty simple. It asks for your name and reads the what you enter from STDIN: standard input.
 
-<pre>
-#!/usr/bin/php -q
- //Always begin with a shebang! -q: quiet, no headers!
-<?php
-// Define STDIN in case it is not already defined by PHP for some reason 
-if (!defined("STDIN")) 
-	  define("STDIN", fopen('php://stdin','r'));
 
+    #!/usr/bin/php -q
+    <?php 
+	 Always begin with a shebang! -q: quiet, no headers!
+    // Define STDIN in case it's not already defined by PHP for some reason 
+
+	 if (!defined("STDIN")) 
+	   define("STDIN", fopen('php://stdin','r'));
  
-echo "Hello! What is your name (enter below):\n";
-       /* reads one line from STDIN and escapes ( \ ) any 
-          funny chars (#'!$%?) for passing cmds/exploits */
-$strName = escapeshellcmd(trim(fread(STDIN, 80))); // Read up to 80 characters or a newline
-echo 'Hello ' , $strName , "\n";
-?>
-</pre>
+	 echo "Hello! What is your name (enter below):\n";
+     /* reads one line from STDIN and escapes ( \ ) any 
+       funny chars (#'!$%?) for passing cmds/exploits
+       also Read up to 80 characters or a newline */   
+	 $strName = escapeshellcmd(trim(fread(STDIN, 80)));
+	 #Send the name entered to STDOUT with echo
+	 echo "Hello " , $strName , "\n";
+	 ?> 
+
 
 
 
