@@ -35,15 +35,15 @@ create a directory on a remote machine.
 
     #!/usr/bin/php
     <?php
-    //create an SSH connection to a remote host, use tcp port: 22
+    // create an SSH connection to a remote host, use tcp port: 22
     
     $connection = ssh2_connect('192.168.56.102', 22);
  		
- 	 //setup Authorization credentials '@': suppress any error msgs
+ 	 // setup Authorization credentials '@': suppress any error msgs
 
     @ssh2_auth_password($connection, 'User_Name', 'password');
     
-    //Assign SFTP variable as handler using ssh2_sftp function
+    // Assign SFTP variable as handler using ssh2_sftp function
     
     $sftp = ssh2_sftp($connection);
     
@@ -55,7 +55,7 @@ create a directory on a remote machine.
     $x = ssh2_sftp_mkdir($sftp, '/home/remote/user/New_Dir') ? 
 	    "Directory Created Successfully" : "Dir not created right"; 
 	    
-    //Now show us the contents of $x, insert a newline before and after it please: \n
+    // Now show us the contents of $x, insert a newline before and after it please: \n
    
     echo ("\n$x\n");
     ?>
@@ -65,11 +65,12 @@ It employs scp: (Secure copy protocol) to send a file to a remote host.
 
     #!/usr/bin/php
     <?php
-    //Make an SSH connection to a remote host, use tcp port: 22 remote host
+    // Make an SSH connection to a remote host, use tcp port: 22
 
     $connection = ssh2_connect('10.10.43.107', 22);
  		
  	 // setup Auth credentials, @ to suppress error messages
+    
     @ssh2_auth_password($connection, 'User_Name', 'password');
 
     /* $do_copy contains an expression which employs the ssh2_scp_send function
@@ -88,11 +89,83 @@ It employs scp: (Secure copy protocol) to send a file to a remote host.
     echo "\n$do_copy\n";
     ?>
 
+**touch_remote_file.php** Another great way to use SSH to create a file on a remote server/machine is to *touch* a file.
+The touch command either changes a file's time-stamp, creates a new blank file, or both.
+
+    #!/usr/bin/php
+    <?php
+    // Make an SSH connection to a remote host, use tcp port: 22
+    
+    $ssh = ssh2_connect('192.168.56.102', 22);
+    
+    // setup Auth/creds
+    
+    @ssh2_auth_password($ssh, 'user', 'pssword');
+	
+	 // $file = the Command string to execute 
+    
+    $file = "touch Newfile.txt";
+    
+    /* Set $stream to ssh2_exec which uses connection as first parameter
+    |  and the command to execute as the 2nd parameter */ 
+       
+    $stream = ssh2_exec($ssh, $file);
+
+    # Use stream blocking function to wait for a response
+    
+    stream_set_blocking($stream, true);
+	 
+	 # if stream returns true display success message
+    
+    if ($stream)
+      echo "File was created successfully";
+      
+    # Close the stream/file handle
+    fclose($stream);	
+    ?>
+
+**web_server_check.php**  Simple script to determine if port 80 is open on a predetermined list of nodes from the
+external file: *system_ips.txt*. 
+
+    #!/usr/bin/php 
+    <?php
+	 
+	 /* Contents of system_ips.txt: one IP per line
+	 |  192.168.56.101
+	 |  127.0.0.1
+    |  192.168.56.103
+    |  192.168.56.111 */
 
 
+	 # Open file containing valid IP addresses of systems to scan
+    
+    $systems = file("system_ips.txt");
+    
+    // for every ip addr in file $port is 80, and $fp = an open socket connection
+    
+    foreach ($systems as $system) {
+		    $port = 80;
+      # $errno is system level error code: 0 = no errors, 
+      # $errstr = the error message, 10 = conn timeout in seconds
+             
+          $fp = fsockopen($system, $port, $errno, $errstr, 10);
 
+      // If $fp returns false, display msg: port not open, else msg = port is open
+      
+      if (!$fp) 
+	    echo "Port $port not available on $system";
+    
+      else {
+	    echo "Port $port is open on $system";
+	 
+	   # Close the file/stream
+      
+      fclose($fp);
+      
+      }
+    }
 
-
+    ?>
 
 
 
