@@ -131,10 +131,10 @@ external file: *system_ips.txt*.
     <?php
 	 
 	 /* Contents of system_ips.txt: one IP per line
-	 |  192.168.56.101
+    |  192.168.56.101
 	 |  127.0.0.1
-    |  192.168.56.103
-    |  192.168.56.111 */
+     |  192.168.56.103
+     |  192.168.56.111 */
 
 
 	 # Open file containing valid IP addresses of systems to scan
