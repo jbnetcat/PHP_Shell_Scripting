@@ -131,7 +131,7 @@ external file: *system_ips.txt*.
     <?php
 	 
 	 /* Contents of system_ips.txt: one IP per line
-    |  192.168.56.101
+     |  192.168.56.101
 	 |  127.0.0.1
      |  192.168.56.103
      |  192.168.56.111 */
@@ -145,20 +145,20 @@ external file: *system_ips.txt*.
     
     foreach ($systems as $system) {
 		    $port = 80;
-      # $errno is system level error code: 0 = no errors, 
-      # $errstr = the error message, 10 = conn timeout in seconds
+    # $errno is system level error code: 0 = no errors, 
+    # $errstr = the error message, 10 = conn timeout in seconds
              
           $fp = fsockopen($system, $port, $errno, $errstr, 10);
 
-      // If $fp returns false, display msg: port not open, else msg = port is open
+    // If $fp returns false, display msg: port not open, else msg = port is open
       
       if (!$fp) 
-	    echo "Port $port not available on $system";
+	     echo "Port $port not available on $system";
     
       else {
-	    echo "Port $port is open on $system";
+	     echo "Port $port is open on $system";
 	 
-	   # Close the file/stream
+    # Close the file/stream
       
       fclose($fp);
       
@@ -167,15 +167,71 @@ external file: *system_ips.txt*.
 
     ?>
 
+**ssh_remote_exec_cmd.php** This script uses secure shell to connect to and send a command to a remote host. Next it
+starts stream blocking, so that after the command is executed, the script waits for the response.
 
+    #!/usr/bin/php
+    <?php
+    
+    // setup conn string
+    $ssh = ssh2_connect('192.168.56.203', 22);
+  
+    // setup Auth credentials
+    @ssh2_auth_password($ssh, 'username', 'password');
+	 
+	 // Command to execute: (CentOS/RHEL) only, ip a =  same as ifconfig
+    $stream = ssh2_exec($ssh, '/usr/sbin/ip a');
 
+    // stream block to wait for response
+    stream_set_blocking($stream, true);
+	
+	 # init $response = empty string $length = 4096 bytes to be read
+    $response = ''; $length = 4096;
+	 
+	 /* loops through stream, reading $length bytes into $buffer until EOF
+	    is reached. For each pass $response = $response + $buffer  */
+    
+    while ($buffer = fread($stream, $length)) {
+		 $response .= $buffer;
+    }	
+    
+    # Close the file/stream & print the response --> STDOUT
+    fclose($stream);
 
+    echo $response;	
+	
+    ?>
 
-
-
-
-
-
+**ping_my_subnet** Ever decided to ping your entire subnet to see which hosts are alive? It's possible 
+with fping, nmap and other tools. However, this script will also get the job done.
+    
+    #!/usr/bin/php
+    <?php
+    
+    // $myip = the Inet IP-addy for localhost, not 127.0.0.1
+    $myip = `hostname -I`;
+	 
+	 // Break my IP addy into an array, delimited by '.' a.k.a separate the ip addr by octets
+    $ips = explode('.', $myip);
+ 	
+ 	 # Loop through my subnet 1-254 not interested in Bcast or Network addy
+    for ($i = 1; $i <= 254; $i++) {
+	
+	 // Build subnet IP addresses based on 1st 3 octets of mine, $i is the last octet
+	    $newip = $ips[0] . '.' . $ips[1] . '.' . $ips[2] . '.' . $i;
+	 
+	 # do_this is assigned the ping command -c: 1 ping, at interval -i: 0.2 secs
+       $do_this = `ping -c1 -i 0.2 $newip`;
+	 
+	 // print a fancy message while you wait for it.
+	   
+	    echo ("--============[Get 'er Done]============--\n");
+	    echo "Pinging: $newip" . "\n Your patience is greatly appreciated!\n";
+    
+    # send results to STDOUT
+      echo $do_this;
+    }
+    ?>
 
 
 
